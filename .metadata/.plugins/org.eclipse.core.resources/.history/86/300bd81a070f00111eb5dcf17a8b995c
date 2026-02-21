@@ -1,0 +1,25 @@
+package com.assessment.storageservicesystem;
+
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
+
+import jakarta.annotation.PostConstruct;
+
+@Component("cloudStorage")
+@Primary
+public class CloudStorageService implements Storage{
+
+	public CloudStorageService(StorageServiceSystemApplication storageServiceSystemApplication) {
+		System.out.println("Cloud Storage Servicee bean created");
+	}
+	
+	@PostConstruct
+	public void init() {
+		System.out.println("Cloud Storage Service bean initialized");
+	}
+	
+	@Override
+	public void storeFile(StringTemplate fileName) {
+		
+	}
+}
