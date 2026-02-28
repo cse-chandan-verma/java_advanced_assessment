@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${movie.id == null} ? 'Add Movie' : 'Edit Movie'">Movie Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --cream: #fdf8f2;
+            --warm-white: #fff9f4;
+            --sand: #f0e6d3;
+            --gold: #c9a84c;
+            --gold-light: #e8c97a;
+            --brown: #6b4f35;
+            --dark: #2c1f0e;
+            --text: #3d2b1a;
+            --muted: #9a8070;
+            --accent: #d4663a;
+            --shadow: 0 4px 24px rgba(44,31,14,0.08);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--warm-white);
+            border-bottom: 1px solid var(--sand);
+            padding: 0 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(44,31,14,0.06);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--gold), var(--accent));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .logo-text span { color: var(--gold); }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .btn-back:hover { color: var(--dark); }
+
+        main {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            animation: fadeUp 0.4s ease;
+        }
+
+        .edit-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-radius: 50px;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+        }
+
+        .edit-badge.add {
+            background: rgba(201,168,76,0.12);
+            color: var(--brown);
+        }
+
+        .edit-badge.edit {
+            background: rgba(212,102,58,0.1);
+            color: var(--accent);
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .page-header p {
+            color: var(--muted);
+            margin-top: 0.4rem;
+            font-size: 0.95rem;
+        }
+
+        .form-card {
+            background: var(--warm-white);
+            border: 1px solid var(--sand);
+            border-radius: 24px;
+            padding: 2.2rem;
+            box-shadow: var(--shadow);
+            animation: fadeUp 0.4s ease 0.1s both;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        label {
+            font-size: 0.82rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--sand);
+            border-radius: 12px;
+            background: var(--cream);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--gold);
+            background: var(--warm-white);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+        }
+
+        input::placeholder { color: #c4aa94; }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a8070' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+            cursor: pointer;
+        }
+
+        .rating-hint {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 0.2rem;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--sand);
+            margin: 1.5rem 0;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+
+        .btn-cancel {
+            padding: 0.7rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            text-decoration: none;
+            color: var(--muted);
+            background: var(--sand);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-cancel:hover { background: #e8d9c5; color: var(--dark); }
+
+        .btn-submit {
+            padding: 0.7rem 2rem;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit.add {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--dark);
+            box-shadow: 0 2px 12px rgba(201,168,76,0.3);
+        }
+
+        .btn-submit.add:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(201,168,76,0.45);
+        }
+
+        .btn-submit.edit {
+            background: linear-gradient(135deg, var(--accent), #e8804f);
+            color: white;
+            box-shadow: 0 2px 12px rgba(212,102,58,0.3);
+        }
+
+        .btn-submit.edit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(212,102,58,0.45);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 500px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <div class="logo-icon">🎬</div>
+        <div class="logo-text">Cine<span>Vault</span></div>
+    </div>
+    <a th:href="@{/movies}" class="btn-back">← Back to Collection</a>
+</header>
+
+<main>
+    <div class="page-header">
+        <!-- Badge: changes based on add or edit -->
+        <div th:if="${movie.id == null}" class="edit-badge add">🎬 New Movie</div>
+        <div th:if="${movie.id != null}" class="edit-badge edit">✏️ Editing</div>
+
+        <!-- Title: changes based on add or edit -->
+        <h1 th:text="${movie.id == null} ? 'Add New Movie' : 'Update Movie'">Movie Form</h1>
+        <p th:text="${movie.id == null} ? 'Fill in the details to add a film to your collection' : 'Modify the details below and save your changes'">Subtitle</p>
+    </div>
+
+    <div class="form-card">
+        <!-- Form action is dynamic from controller -->
+        <form th:action="${formAction}" th:object="${movie}" method="post">
+
+            <div class="form-grid">
+
+                <div class="form-group full-width">
+                    <label for="title">Movie Title</label>
+                    <input type="text" id="title" th:field="*{title}" placeholder="e.g. The Dark Knight" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="director">Director</label>
+                    <input type="text" id="director" th:field="*{director}" placeholder="e.g. Christopher Nolan" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="genre">Genre</label>
+                    <select id="genre" th:field="*{genre}" required>
+                        <option value="" disabled>Select genre</option>
+                        <option value="Action">Action</option>
+                        <option value="Adventure">Adventure</option>
+                        <option value="Animation">Animation</option>
+                        <option value="Comedy">Comedy</option>
+                        <option value="Crime">Crime</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Fantasy">Fantasy</option>
+                        <option value="Horror">Horror</option>
+                        <option value="Mystery">Mystery</option>
+                        <option value="Romance">Romance</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Thriller">Thriller</option>
+                        <option value="Documentary">Documentary</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="year">Release Year</label>
+                    <input type="number" id="year" th:field="*{year}" placeholder="e.g. 2008" min="1888" max="2099" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="rating">Rating</label>
+                    <input type="number" id="rating" th:field="*{rating}" placeholder="e.g. 8.5" min="0" max="10" step="0.1" required />
+                    <span class="rating-hint">⭐ Score from 0 to 10</span>
+                </div>
+
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="form-actions">
+                <a th:href="@{/movies}" class="btn-cancel">Cancel</a>
+
+                <!-- Button style and text changes based on add or edit -->
+                <button type="submit"
+                        th:class="${movie.id == null} ? 'btn-submit add' : 'btn-submit edit'"
+                        th:text="${movie.id == null} ? 'Save Movie' : 'Update Movie'">
+                    Submit
+                </button>
+            </div>
+
+        </form>
+    </div>
+</main>
+
+</body>
+</html>

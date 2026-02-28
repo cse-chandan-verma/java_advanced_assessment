@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Collection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --cream: #fdf8f2;
+            --warm-white: #fff9f4;
+            --sand: #f0e6d3;
+            --gold: #c9a84c;
+            --gold-light: #e8c97a;
+            --brown: #6b4f35;
+            --dark: #2c1f0e;
+            --text: #3d2b1a;
+            --muted: #9a8070;
+            --accent: #d4663a;
+            --green: #5a7a5e;
+            --shadow: 0 4px 24px rgba(44,31,14,0.08);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--warm-white);
+            border-bottom: 1px solid var(--sand);
+            padding: 0 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(44,31,14,0.06);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--gold), var(--accent));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .logo-text span { color: var(--gold); }
+
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--dark);
+            text-decoration: none;
+            padding: 0.55rem 1.3rem;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 12px rgba(201,168,76,0.3);
+        }
+
+        .btn-add:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(201,168,76,0.45);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            animation: fadeUp 0.5s ease;
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .page-header p {
+            color: var(--muted);
+            margin-top: 0.4rem;
+            font-size: 0.95rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            animation: fadeUp 0.5s ease 0.1s both;
+        }
+
+        .stat-chip {
+            background: var(--warm-white);
+            border: 1px solid var(--sand);
+            border-radius: 50px;
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .stat-chip strong { color: var(--text); }
+
+        .table-wrapper {
+            background: var(--warm-white);
+            border-radius: 20px;
+            border: 1px solid var(--sand);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            animation: fadeUp 0.5s ease 0.2s both;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead { background: linear-gradient(to right, #f5ede0, #f9f3eb); }
+
+        thead th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.78rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            border-bottom: 1px solid var(--sand);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f5ece0;
+            transition: background 0.15s ease;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #fdf4ea; }
+
+        tbody td {
+            padding: 1rem 1.5rem;
+            font-size: 0.92rem;
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        .movie-title {
+            font-weight: 600;
+            font-family: 'Playfair Display', serif;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+
+        .genre-badge {
+            display: inline-block;
+            background: rgba(90,122,94,0.12);
+            color: var(--green);
+            border-radius: 50px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.78rem;
+            font-weight: 500;
+        }
+
+        .rating-stars {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .rating-num { font-weight: 600; color: var(--dark); }
+        .star { color: var(--gold); font-size: 0.85rem; }
+
+        .actions { display: flex; gap: 0.5rem; }
+
+        .btn-edit, .btn-delete {
+            padding: 0.35rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-edit {
+            background: rgba(201,168,76,0.12);
+            color: var(--brown);
+            border-color: rgba(201,168,76,0.3);
+        }
+
+        .btn-edit:hover { background: rgba(201,168,76,0.25); }
+
+        .btn-delete {
+            background: rgba(212,102,58,0.1);
+            color: var(--accent);
+            border-color: rgba(212,102,58,0.25);
+        }
+
+        .btn-delete:hover { background: rgba(212,102,58,0.2); }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--muted);
+        }
+
+        .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+
+        .empty-state h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <div class="logo-icon">🎬</div>
+        <div class="logo-text">Cine<span>Vault</span></div>
+    </div>
+    <a th:href="@{/addMovies}" class="btn-add">＋ Add Movie</a>
+</header>
+
+<main>
+    <div class="page-header">
+        <h1>Movie Collection</h1>
+        <p>Browse and manage your curated film library</p>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-chip">🎥 Total: <strong th:text="${movies.size()}">0</strong> movies</div>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Director</th>
+                    <th>Genre</th>
+                    <th>Year</th>
+                    <th>Rating</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${movies.isEmpty()}">
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <div class="icon">🎞️</div>
+                            <h3>No movies yet</h3>
+                            <p>Start building your collection by adding your first movie.</p>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr th:each="movie, stat : ${movies}">
+                    <td th:text="${stat.index + 1}" style="color:var(--muted); font-size:0.85rem;"></td>
+                    <td><span class="movie-title" th:text="${movie.title}">Title</span></td>
+                    <td th:text="${movie.director}">Director</td>
+                    <td><span class="genre-badge" th:text="${movie.genre}">Genre</span></td>
+                    <td th:text="${movie.year}">Year</td>
+                    <td>
+                        <div class="rating-stars">
+                            <span class="star">★</span>
+                            <span class="rating-num" th:text="${movie.rating}">0.0</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a th:href="@{/movies/edit/{id}(id=${movie.id})}" class="btn-edit">Edit</a>
+                            <a th:href="@{/movies/delete/{id}(id=${movie.id})}" class="btn-delete"
+                               onclick="return confirm('Delete this movie?')">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+</body>
+</html>
