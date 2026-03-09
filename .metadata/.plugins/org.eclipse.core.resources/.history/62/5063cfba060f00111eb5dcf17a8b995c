@@ -1,5 +1,0 @@
-package com.assessment.storageservicesystem;
-
-public interface Storage {
-
-}
